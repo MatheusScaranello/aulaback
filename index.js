@@ -53,7 +53,12 @@ app.post('/users', async (req, res) => {
             'INSERT INTO users (name, last_name, email, date_of_birth, age, zodiac_sign) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',
             [name, last_name, email, date_of_birth, age, zodiac_sign]
             );
-        res.json(rows);
+        res.json(
+            {
+                message: 'User created successfully',
+                user: rows[0],
+            }
+        );
         }
     catch (error) {
         console.log("error in post users",error);
@@ -72,7 +77,9 @@ app.put('/users/:id', async (req, res) => {
             'UPDATE users SET name = $1, last_name = $2, email = $3, date_of_birth = $4, age = $5, zodiac_sign = $6 WHERE id = $7 RETURNING *',
             [name, last_name, email, date_of_birth, age, zodiac_sign, id]
             );
-        res.json(rows);
+        res.json(
+            rows.length > 0 ? {message: 'Update sucess!', rows}: { message: 'User not found' }
+        );
         }
     catch (error) {
         console.log("error in put users",error);
@@ -84,7 +91,10 @@ app.delete('/users/:id', async (req, res) => {
     const { id } = req.params;
     try {
         const { rows } = await pool.query('DELETE FROM users WHERE id = $1 RETURNING *', [id]);
-        res.json(rows);
+            res.json({
+                message: rows.length > 0 ? 'User deleted successfully' : 'User not found',
+                user: rows[0],
+            });
         }
     catch (error) {
         console.log("error in delete users",error);
